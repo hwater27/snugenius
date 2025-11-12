@@ -127,9 +127,11 @@ const SendButton = styled.button`
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.2s ease;
-
     &:hover {
         background-color: #7c8cff;
+    }
+    &:active {
+        transform: scale(0.9);
     }
 `;
 
