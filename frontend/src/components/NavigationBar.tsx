@@ -102,7 +102,7 @@ export default function NavigationBar() {
         
         {/* 상단 메뉴 */}
         <Menu $active={location.pathname === "/"}><Link to="/">대시보드</Link></Menu>
-        <Menu $active={location.pathname.startsWith("/question")}><Link to="/question/progress">질문하기</Link>
+        <Menu $active={location.pathname.startsWith("/question")}><Link to="/question">질문하기</Link>
           {/* <SubBar>
             <SubMenu><Link to="/question/inquiry">규정 확인 · 문의</Link></SubMenu>
             <SubMenu><Link to="/question/progress">이수 현황 · 수강 계획</Link></SubMenu>
