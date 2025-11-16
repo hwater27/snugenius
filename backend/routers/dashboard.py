@@ -1,8 +1,6 @@
 # routers/dashboard.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
-import sys
 from database import get_db
 from models import FAQ, MyQuestion
 from sqlalchemy import desc

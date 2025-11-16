@@ -13,22 +13,22 @@ router = APIRouter(prefix="/api/question", tags=["question"])
 
 
 # LLM 답변 받기
-@router.post("/llm&{type}")
-def ask_question(type: str, payload: QuestionCreate, db: Session = Depends(get_db)):
-    answer = ask_llm(type, payload.content)
+@router.post("/llm")
+def ask_question(payload: QuestionCreate, db: Session = Depends(get_db)):
+    answer = ask_llm(payload.type, payload.content)
 
     new_q = Question(
         user_id=payload.user_id,
         type=payload.type,
         content=payload.content,
-        answer=answer,
+        answer=answer["answer"],
         relevant_requirement=payload.relevant_requirement
     )
     db.add(new_q)
     db.commit()
     db.refresh(new_q)
 
-    return {"question": new_q, "llm_answer": answer}
+    return {"question": new_q, "llm_answer": answer["answer"], "tag": answer["tag"], "requirement": answer["requirement"]}
 
 
 # 추천 받기
