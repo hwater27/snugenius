@@ -1,5 +1,8 @@
 import { useState } from "react";
 import styled from "styled-components";
+import axios from "axios";
+
+const backendURL = 'http://localhost:8000';
 
 const Container = styled.div`
     width: 1200px;
@@ -147,11 +150,12 @@ export default function QuestionProgress() {
   const [messages, setMessages] = useState<Message[]>([
     {
       type: "bot",
-      text: `안녕하세요, OOO님의 이수 현황을 확인해드리겠습니다.
+      text: `안녕하세요, OOO 님의 이수 현황을 확인해드리겠습니다.
 이수 규정을 하나씩 점검하며 질문드릴까요, 
 아니면 미이수 내용만 빠르게 확인해드릴까요? 아래 버튼 중 한 가지를 눌러주세요!`,
       tags: ["✍️ 이수 규정 하나씩 점검하기", "🏃‍♂️ 미이수 내용만 빠르게 확인하기"],
-      buttons: [{ label: "교과목 목록", link: "" }],
+      buttons: [],
+      // buttons: [{ label: "교과목 목록", link: "" }],
     },
   ]);
 
@@ -162,13 +166,69 @@ export default function QuestionProgress() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    setTimeout(() => {
-      const botReply: Message = {
+     try {
+      const response = await axios.post(`${backendURL}/api/question/llm`, {
+        user_id: 1,  // 변경 필요
+        type: "simulation",  // 변경 필요
+        content: input,
+        relevant_requirement: null,
+      });
+
+      const llmAnswer: string = response.data.llm_answer;
+
+      const botMessage: Message = {
         type: "bot",
-        text: `"${input}"에 대한 규정을 확인 중입니다.\n답변은 추후 제작 예정입니다.`,
+        text: llmAnswer,
       };
-      setMessages((prev) => [...prev, botReply]);
-    }, 1000);
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error(error);
+      const botMessage: Message = {
+        type: "bot",
+        text: "답변을 가져오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      };
+      setMessages((prev) => [...prev, botMessage]);
+    }
+
+    // setTimeout(() => {
+    //   const botReply: Message = {
+    //     type: "bot",
+    //     text: `"${input}"에 대한 규정을 확인 중입니다.\n답변은 추후 제작 예정입니다.`,
+    //   };
+    //   setMessages((prev) => [...prev, botReply]);
+    // }, 1000);
+  };
+
+  const clickTag = async (tag: string) => {
+    const userMessage: Message = { type: "user", text: tag };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+
+     try {
+      const response = await axios.post(`${backendURL}/api/question/llm`, {
+        user_id: 1,  // 변경 필요
+        type: (tag == "✍️ 이수 규정 하나씩 점검하기") ? "checklist" : ((tag == "🏃‍♂️ 미이수 내용만 빠르게 확인하기") ? "quick" : "simulation"),
+        content: tag,
+        relevant_requirement: null,
+      });
+
+      const llmAnswer: string = response.data.llm_answer;
+
+      const botMessage: Message = {
+        type: "bot",
+        text: llmAnswer,
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error(error);
+      const botMessage: Message = {
+        type: "bot",
+        text: "답변을 가져오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      };
+      setMessages((prev) => [...prev, botMessage]);
+    }
   };
 
   return (
@@ -187,7 +247,7 @@ export default function QuestionProgress() {
             {msg.tags && msg.tags.length > 0 && (
               <TagContainer>
                 {msg.tags.map((tag, i) => (
-                  <Tag key={i}>{tag}</Tag>
+                  <Tag onClick={() => clickTag(tag)} key={i}>{tag}</Tag>
                 ))}
               </TagContainer>
             )}

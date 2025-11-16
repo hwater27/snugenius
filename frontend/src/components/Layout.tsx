@@ -24,7 +24,6 @@ const NavContainer = styled.div`
 
 const NavInner = styled.div`
     width: 1200px;
-    left: -200;
     position: relative;
     display: flex;
     justify-content: space-between;
